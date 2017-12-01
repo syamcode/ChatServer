@@ -16,10 +16,11 @@ import java.util.logging.Logger;
  *
  * @author syamcode
  */
-public class ChatServer {
+public class ChatServer implements Runnable{
     ServerSocket server;
     Socket socket;
     DataInputStream inpStream;
+    Thread thread;
     public static void main(String[] args) {
         ChatServer chat = new ChatServer();
         chat.startServer(5001);
@@ -29,24 +30,7 @@ public class ChatServer {
         try {
             server = new ServerSocket(port);
             System.out.println("Server started "+server);
-            System.out.println("Waiting for client ...");
-            socket = server.accept();
-            System.out.println("Client Accepted: "+socket);
-                
-            boolean connect = true;
-            inpStream = new DataInputStream(socket.getInputStream());
-            while(connect) {
-                try {
-                    String str = inpStream.readUTF();
-                    System.out.println("Message: "+str);
-                    connect = !(str.equals("/quit"));
-                }
-                catch(IOException e) {
-                    connect = false;
-                    System.out.println(e);
-                }
-            }
-            close();
+            start();
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -58,6 +42,47 @@ public class ChatServer {
         }
         if(socket!=null) {
             socket.close();
+        }
+    }
+    public void start() {
+        if(thread==null) {
+            thread = new Thread(this);
+            thread.start();
+        }
+    }
+
+    public void stop() {
+        if(thread!=null) {
+            thread.stop();
+            thread = null;
+        }
+    }
+    @Override
+    public void run() {
+        while(thread!=null) {
+            try{
+                System.out.println("Waiting for client ...");
+                socket = server.accept();
+                System.out.println("Client Accepted: "+socket);
+
+                boolean connect = true;
+                inpStream = new DataInputStream(socket.getInputStream());
+                while(connect) {
+                    try {
+                        String str = inpStream.readUTF();
+                        System.out.println("Message: "+str);
+                        connect = !(str.equals("/quit"));
+                    }
+                    catch(IOException e) {
+                        connect = false;
+                        System.out.println(e);
+                    }
+                }
+                close();
+            }
+            catch(Exception e) {
+                System.out.println(e);
+            }
         }
     }
 }
