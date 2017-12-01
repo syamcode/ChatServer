@@ -18,13 +18,8 @@ import java.util.logging.Logger;
  */
 public class ChatServer implements Runnable{
     ServerSocket server;
-    Socket socket;
-    DataInputStream inpStream;
     Thread thread;
-    public static void main(String[] args) {
-        ChatServer chat = new ChatServer();
-        chat.startServer(5001);
-    }
+    ChatServerThread client;
     
     public void startServer(int port) {
         try {
@@ -35,16 +30,30 @@ public class ChatServer implements Runnable{
             System.out.println(e);
         }
     }
-    
-    public void close() throws IOException {
-        if(inpStream!=null) {
-            inpStream.close();
-        }
-        if(socket!=null) {
-            socket.close();
+    @Override
+    public void run() {
+        while(thread!=null) {
+            try{
+                System.out.println("Waiting for client ...");
+                addThread(server.accept());
+            }
+            catch(Exception e) {
+                System.out.println(e);
+            }
         }
     }
-    public void start() {
+    public void addThread(Socket socket) {
+        System.out.println("Client Accepted: "+socket);
+        client = new ChatServerThread(this, socket);
+        try{
+            client.open();
+            client.start();
+        }
+        catch(Exception e) {
+            System.out.println(e);
+        }
+    }
+        public void start() {
         if(thread==null) {
             thread = new Thread(this);
             thread.start();
@@ -57,32 +66,8 @@ public class ChatServer implements Runnable{
             thread = null;
         }
     }
-    @Override
-    public void run() {
-        while(thread!=null) {
-            try{
-                System.out.println("Waiting for client ...");
-                socket = server.accept();
-                System.out.println("Client Accepted: "+socket);
-
-                boolean connect = true;
-                inpStream = new DataInputStream(socket.getInputStream());
-                while(connect) {
-                    try {
-                        String str = inpStream.readUTF();
-                        System.out.println("Message: "+str);
-                        connect = !(str.equals("/quit"));
-                    }
-                    catch(IOException e) {
-                        connect = false;
-                        System.out.println(e);
-                    }
-                }
-                close();
-            }
-            catch(Exception e) {
-                System.out.println(e);
-            }
-        }
+    public static void main(String[] args) {
+        ChatServer chat = new ChatServer();
+        chat.startServer(5001);
     }
 }
