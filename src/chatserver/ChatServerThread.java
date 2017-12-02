@@ -19,11 +19,11 @@ import java.util.logging.Logger;
  * @author syamcode
  */
 public class ChatServerThread extends Thread{
-    Socket socket;
-    ChatServer server;
-    int ID = -1;
-    DataInputStream inpStream;
-    DataOutputStream outStream;
+    private Socket socket;
+    private ChatServer server;
+    private int ID = -1;
+    private DataInputStream inpStream;
+    private DataOutputStream outStream;
     public ChatServerThread(ChatServer _server, Socket _socket) {
         super();
         server = _server;

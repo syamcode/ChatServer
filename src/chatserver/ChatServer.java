@@ -17,9 +17,9 @@ import java.util.logging.Logger;
  * @author syamcode
  */
 public class ChatServer implements Runnable{
-    ServerSocket server;
-    Thread thread;
-    ChatServerThread[] clients = new ChatServerThread[50];
+    private ServerSocket server;
+    private Thread thread;
+    private ChatServerThread[] clients = new ChatServerThread[50];
     int clientCount = 0;
     
     public void startServer(int port) {
